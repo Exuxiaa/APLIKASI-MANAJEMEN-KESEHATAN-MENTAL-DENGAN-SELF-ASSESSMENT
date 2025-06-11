@@ -10,25 +10,36 @@ type Assessment struct {
 	id      int
 	nama    string
 	hp      string
-	tanggal int
+	tanggal string
 	skor    [5]int
+	rekom   string
 }
 
 var data [100]Assessment
 var jumlahData int = 0
 var idOtomatis int = 1001
 
-var pertanyaan = [10]string{
-	"1. Apakah kamu merasa cemas akhir-akhir ini?",
-	"2. Apakah kamu kesulitan tidur atau istirahat?",
-	"3. Apakah kamu merasa lelah secara emosional?",
-	"4. Apakah kamu bisa fokus saat bekerja atau belajar?",
-	"5. Apakah kamu merasa berharga dan dihargai?",
-	"6. Apakah kamu sering merasa sedih tanpa sebab?",
-	"7. Apakah kamu kehilangan minat pada hal yang biasa kamu sukai?",
-	"8. Apakah kamu merasa mudah marah akhir-akhir ini?",
-	"9. Apakah kamu mengalami perubahan nafsu makan?",
-	"10. Apakah kamu mengalami kesulitan dalam mengambil keputusan?",
+var pertanyaan = [20]string{
+	"Apakah kamu merasa bahagia dan puas dengan hidupmu?",
+	"Apakah kamu mampu mengelola stres sehari-hari dengan baik?",
+	"Apakah kamu sering merasa tenang dan damai secara emosional?",
+	"Apakah kamu optimis tentang masa depanmu?",
+	"Apakah kamu nyaman dalam berinteraksi sosial dengan orang lain?",
+	"Apakah kamu bisa mengatasi tantangan atau kesulitan dengan baik?",
+	"Apakah kamu merasa termotivasi untuk melakukan hal-hal yang penting bagimu?",
+	"Apakah kamu percaya diri dalam mengambil keputusan?",
+	"Apakah kamu merasa dihargai dan dicintai oleh orang-orang di sekitarmu?",
+	"Apakah kamu memiliki kualitas tidur yang baik dalam beberapa minggu terakhir?",
+	"Apakah kamu sering merasa cemas atau khawatir tanpa alasan yang jelas?",
+	"Apakah kamu kehilangan minat atau energi untuk melakukan aktivitas sehari-hari?",
+	"Apakah kamu merasa bisa fokus dan berkonsentrasi dengan baik?",
+	"Apakah kamu merasa bahwa hidupmu memiliki makna dan tujuan?",
+	"Apakah kamu nyaman dalam mengungkapkan emosi dan perasaan kepada orang lain?",
+	"Apakah kamu merasa kesepian atau terisolasi dari orang-orang di sekitarmu?",
+	"Apakah kamu mampu mengendalikan pikiran negatif?",
+	"Apakah kamu merasa terbebani oleh tanggung jawab atau tekanan hidup?",
+	"Apakah kamu puas dengan hubungan sosial dan emosional yang kamu miliki?",
+	"Apakah kamu bisa menikmati momen kecil dalam hidup tanpa gangguan pikiran negatif?",
 }
 
 var rekomendasiBagus = [3]string{"Pertahankan kondisi positifmu.", "Kamu dalam kondisi mental yang baik!", "Terus lakukan hal-hal yang kamu sukai."}
@@ -39,12 +50,32 @@ func tambahData() {
 	var nama, hp string
 	var skor [5]int
 	var indeksTerpilih [5]int
-	var i, tanggal, total int
+	var i, id int
+	var tanggal, hasilRekom string
 
 	fmt.Print("Masukkan Nama: ")
 	fmt.Scanln(&nama)
 	fmt.Print("Masukkan No HP: ")
 	fmt.Scanln(&hp)
+
+	// Validasi ID
+	for {
+		fmt.Print("Masukkan ID: ")
+		fmt.Scanln(&id)
+
+		duplikat := false
+		for i = 0; i < jumlahData; i++ {
+			if data[i].id == id && (data[i].nama != nama || data[i].hp != hp) {
+				fmt.Println("ID sudah digunakan oleh pengguna lain. Silakan masukkan ID yang berbeda.")
+				duplikat = true
+				break
+			}
+		}
+
+		if !duplikat {
+			break
+		}
+	}
 
 	fmt.Println("Jawab pertanyaan berikut (1-5):")
 
@@ -72,15 +103,23 @@ func tambahData() {
 		skor[i] = jawaban
 	}
 
-	tanggal = time.Now().Year()*10000 + int(time.Now().Month())*100 + time.Now().Day()
+	tanggal = time.Now().Format("2006-01-02")
+	total := hitungTotal(skor)
+	hasilRekom = rekomendasi(total) // Simpan hasil rekomendasi
 
-	data[jumlahData] = Assessment{id: idOtomatis, nama: nama, hp: hp, tanggal: tanggal, skor: skor}
+	data[jumlahData] = Assessment{
+		id:      id,
+		nama:    nama,
+		hp:      hp,
+		tanggal: tanggal,
+		skor:    skor,
+		rekom:   hasilRekom,
+	}
 	jumlahData++
+
 	fmt.Println("Data berhasil ditambahkan!")
-	total = hitungTotal(skor)
-	fmt.Println("Total Skor:", total, idOtomatis)
-	fmt.Println("Rekomendasi:", rekomendasi(total))
-	idOtomatis++
+	fmt.Println("Total Skor:", total)
+	fmt.Println("Rekomendasi:", hasilRekom)
 }
 
 func hitungTotal(skor [5]int) int {
@@ -102,20 +141,69 @@ func rekomendasi(nilai int) string {
 	return rekomendasiKurang[rand.Intn(3)]
 }
 
-func tampilkanAssessment(a Assessment) {
-	var i, total int
+func editData() {
+	var idCari, i int
+	var namaBaru, hpBaru string
 
+	fmt.Print("Masukkan ID yang ingin diedit: ")
+	fmt.Scanln(&idCari)
+
+	var ditemukan bool = false
+
+	for i = 0; i < jumlahData; i++ {
+		if data[i].id == idCari {
+			if !ditemukan {
+				fmt.Print("Masukkan Nama Baru: ")
+				fmt.Scanln(&namaBaru)
+				fmt.Print("Masukkan No HP Baru: ")
+				fmt.Scanln(&hpBaru)
+			}
+			data[i].nama = namaBaru
+			data[i].hp = hpBaru
+			ditemukan = true
+		}
+	}
+
+	if ditemukan {
+		fmt.Println("Semua data dengan ID tersebut berhasil diperbarui!")
+	} else {
+		fmt.Println("Data tidak ditemukan.")
+	}
+}
+
+func hapusData() {
+	var idCari, i, j int
+
+	fmt.Print("Masukkan ID yang ingin dihapus: ")
+	fmt.Scanln(&idCari)
+
+	for i = 0; i < jumlahData; i++ {
+		if data[i].id == idCari {
+			for j = i; j < jumlahData-1; j++ {
+				data[j] = data[j+1]
+			}
+			jumlahData--
+			fmt.Println("Data berhasil dihapus.")
+			return
+		}
+	}
+	fmt.Println("Data tidak ditemukan.")
+}
+
+func tampilkanAssessment(a Assessment) {
+	var i int
 	fmt.Println("---------------")
 	fmt.Println("ID:      ", a.id)
 	fmt.Println("Nama:    ", a.nama)
 	fmt.Println("Tanggal: ", a.tanggal)
 	fmt.Print("Skor:    ")
+
 	for i = 0; i < 5; i++ {
 		fmt.Print(a.skor[i], " ")
 	}
-	total = hitungTotal(a.skor)
+	total := hitungTotal(a.skor)
 	fmt.Println("\nTotal Skor:", total)
-	fmt.Println("Rekomendasi:", rekomendasi(total))
+	fmt.Println("Rekomendasi:", a.rekom) // Gunakan rekomendasi yang tersimpan
 	fmt.Println("---------------")
 }
 
@@ -188,7 +276,7 @@ func urutkanTanggalInsertion() {
 	for i = 1; i < jumlahData; i++ {
 		temp := data[i]
 		j = i - 1
-		for j >= 0 && data[j].tanggal > temp.tanggal {
+		for j >= 0 && data[j].tanggal > temp.tanggal { // terlama ke terbaru
 			data[j+1] = data[j]
 			j--
 		}
@@ -196,15 +284,31 @@ func urutkanTanggalInsertion() {
 	}
 }
 
-func tampilkanLaporan(nama, hp string) {
-	var count, hariIni, i, rata, jumlahSkor int
+func urutkanSkorTotalSelection() {
+	var i, j, minIdx int
 
-	count = 0
-	jumlahSkor = 0
-	hariIni = time.Now().Year()*10000 + int(time.Now().Month())*100 + time.Now().Day()
+	for i = 0; i < jumlahData-1; i++ {
+		minIdx = i
+		for j = i + 1; j < jumlahData; j++ {
+			if hitungTotal(data[j].skor) < hitungTotal(data[minIdx].skor) {
+				minIdx = j
+			}
+		}
+		if minIdx != i {
+			temp := data[i]
+			data[i] = data[minIdx]
+			data[minIdx] = temp
+		}
+	}
+}
+
+func tampilkanLaporan(nama, hp string) {
+	var count, i, rata, jumlahSkor int
 
 	fmt.Println("Laporan untuk:", nama)
 
+	// Tampilkan 5 data terakhir dari belakang ke depan
+	count = 0
 	for i = jumlahData - 1; i >= 0 && count < 5; i-- {
 		if data[i].nama == nama && data[i].hp == hp {
 			tampilkanAssessment(data[i])
@@ -212,15 +316,24 @@ func tampilkanLaporan(nama, hp string) {
 		}
 	}
 
+	// Hitung rata-rata skor dari data yang tanggalnya dalam 30 hari terakhir
 	count = 0
+	jumlahSkor = 0
+	sekarang := time.Now()
+
 	for i = 0; i < jumlahData; i++ {
 		if data[i].nama == nama && data[i].hp == hp {
-			if hariIni-data[i].tanggal <= 30 {
-				jumlahSkor += hitungTotal(data[i].skor)
-				count++
+			waktuData, err := time.Parse("2006-01-02", data[i].tanggal)
+			if err == nil {
+				selisih := sekarang.Sub(waktuData).Hours() / 24
+				if selisih <= 30 {
+					jumlahSkor += hitungTotal(data[i].skor)
+					count++
+				}
 			}
 		}
 	}
+
 	if count > 0 {
 		rata = jumlahSkor / count
 		fmt.Println("Rata-rata skor 30 hari terakhir:", rata)
@@ -236,9 +349,12 @@ func main() {
 		fmt.Println("1. Tambah Data Assessment")
 		fmt.Println("2. Cari (Sequential Search)")
 		fmt.Println("3. Cari (Binary Search)")
-		fmt.Println("4. Urutkan berdasarkan Tanggal")
-		fmt.Println("5. Tampilkan Laporan Pengguna")
-		fmt.Println("6. Keluar")
+		fmt.Println("4. Urutkan berdasarkan Tanggal (Insertion Sort)")
+		fmt.Println("5. Urutkan berdasarkan Skor (Selection Sort)")
+		fmt.Println("6. Tampilkan Laporan Pengguna")
+		fmt.Println("7. Edit Data Assessment")
+		fmt.Println("8. Hapus Data Assessment")
+		fmt.Println("9. Keluar")
 		fmt.Print("Pilih menu: ")
 
 		var pilih int
@@ -255,13 +371,20 @@ func main() {
 			urutkanTanggalInsertion()
 			fmt.Println("Data berhasil diurutkan berdasarkan tanggal.")
 		case 5:
+			urutkanSkorTotalSelection()
+			fmt.Println("Data berhasil diurutkan berdasarkan skor (Selection Sort).")
+		case 6:
 			var nama, hp string
 			fmt.Print("Masukkan Nama: ")
 			fmt.Scanln(&nama)
 			fmt.Print("Masukkan No HP: ")
 			fmt.Scanln(&hp)
 			tampilkanLaporan(nama, hp)
-		case 6:
+		case 7:
+			editData()
+		case 8:
+			hapusData()
+		case 9:
 			fmt.Println("Terima kasih!")
 			return
 		default:
