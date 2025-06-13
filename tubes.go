@@ -80,7 +80,7 @@ func tambahData() {
 
 	fmt.Println("Jawab pertanyaan berikut (1-5):")
 
-	digunakan := [10]bool{}
+	digunakan := [20]bool{}
 	for i = 0; i < 5; {
 		indeks = rand.Intn(10)
 		if !digunakan[indeks] {
