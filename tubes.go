@@ -50,8 +50,9 @@ func tambahData() {
 	var nama, hp string
 	var skor [5]int
 	var indeksTerpilih [5]int
-	var i, id int
+	var i, id, indeks, total int
 	var tanggal, hasilRekom string
+	var duplikat bool
 
 	fmt.Print("Masukkan Nama: ")
 	fmt.Scanln(&nama)
@@ -63,12 +64,12 @@ func tambahData() {
 		fmt.Print("Masukkan ID: ")
 		fmt.Scanln(&id)
 
-		duplikat := false
+		duplikat = false
 		for i = 0; i < jumlahData; i++ {
 			if data[i].id == id && (data[i].nama != nama || data[i].hp != hp) {
 				fmt.Println("ID sudah digunakan oleh pengguna lain. Silakan masukkan ID yang berbeda.")
 				duplikat = true
-				break
+				return
 			}
 		}
 
@@ -81,7 +82,7 @@ func tambahData() {
 
 	digunakan := [10]bool{}
 	for i = 0; i < 5; {
-		indeks := rand.Intn(10)
+		indeks = rand.Intn(10)
 		if !digunakan[indeks] {
 			digunakan[indeks] = true
 			indeksTerpilih[i] = indeks
@@ -104,7 +105,7 @@ func tambahData() {
 	}
 
 	tanggal = time.Now().Format("2006-01-02")
-	total := hitungTotal(skor)
+	total = hitungTotal(skor)
 	hasilRekom = rekomendasi(total) // Simpan hasil rekomendasi
 
 	data[jumlahData] = Assessment{
